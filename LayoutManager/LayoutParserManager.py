@@ -8,6 +8,7 @@ class LayoutParserManager:
                                  extra_config=["MODEL.ROI_HEADS.SCORE_THRESH_TEST", 0.8],
                                  label_map={0: "Text", 1: "Title", 2: "List", 3:"Table", 4:"Figure"})
         self.layout = None
+        self.ocr_agent = lp.TesseractAgent(languages='eng')
 
     def getModel(self):
         return self.model
@@ -18,3 +19,21 @@ class LayoutParserManager:
     def drawResult(self, img, layout):
         res = lp.draw_box(img, layout, box_width=3)
         return res
+
+    def onlyTextBlocks(self, layout_result):
+        #lp.Layout([b for b in layout_result if b.type == 'Text'])
+        # return all text boxes
+        return lp.Layout([b for b in layout_result])
+
+    def getTextsInTextBlock(self, text_blocks, img):
+        for block in text_blocks:
+            # Crop image around the detected layout
+            segment_image = (block
+                             .pad(left=15, right=15, top=5, bottom=5)
+                             .crop_image(img))
+
+            # Perform OCR
+            text = self.ocr_agent.detect(segment_image)
+
+            # Save OCR result
+            block.set(text=text, inplace=True)
