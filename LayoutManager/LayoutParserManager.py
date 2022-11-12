@@ -1,6 +1,8 @@
 import layoutparser as lp
 import pdf2image
 import numpy as np
+from gibberish_detector import detector
+# gibberish detector from  https://pypi.org/project/gibberish-detector/
 
 class LayoutParserManager:
     def __init__(self):
@@ -9,6 +11,7 @@ class LayoutParserManager:
                                  label_map={0: "Text", 1: "Title", 2: "List", 3:"Table", 4:"Figure"})
         self.layout = None
         self.ocr_agent = lp.TesseractAgent(languages='eng')
+        self.gibberish_detector = detector.create_from_model('model/big.model')
 
     def getModel(self):
         return self.model
@@ -34,6 +37,8 @@ class LayoutParserManager:
 
             # Perform OCR
             text = self.ocr_agent.detect(segment_image)
-
+            if self.gibberish_detector.is_gibberish(text):
+                print(text)
+                text = 'gibberish'
             # Save OCR result
             block.set(text=text, inplace=True)
