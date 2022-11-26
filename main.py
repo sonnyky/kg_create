@@ -29,4 +29,12 @@ with open('extracted_text.txt', 'w', encoding='utf-8') as f:
     for txt in text_blocks.get_texts():
         f.write(txt)
         f.write('\n')
+        res = lp_manager.constituencyParsing(txt)
+        print(res)
+
+# Constituency parsing.
+
+
+# Relation creation
+# Rule: All capitals are titles
 
